@@ -1,6 +1,6 @@
 import mysql.connector
 from tkinter import *
-
+from main import Main
 class Add:
     def __init__(self, db_connection, update_callback):
         self.db_connection = db_connection
@@ -32,8 +32,12 @@ class Add:
         self.price_entry = Entry(self.root)
         self.price_entry.grid(row=4, column=1)
 
+        Label(self.root, text='Số lượng:').grid(row=5, column=0)
+        self.quantity_entry = Entry(self.root)
+        self.quantity_entry.grid(row=5, column=1)
+
         # Button
-        Button(self.root, text='Thêm', command=self.add_product).grid(row=5, column=0, columnspan=2)
+        Button(self.root, text='Thêm', command=self.add_product).grid(row=6, column=0, columnspan=2)
 
     def add_product(self):
         userid= self.userid_entry.get()
@@ -41,12 +45,13 @@ class Add:
         size = self.size_entry.get()
         brand = self.brand_entry.get()
         price = self.price_entry.get()
+        quantity = self.quantity_entry.get()
 
         # Connect to database
         cursor = self.db_connection.cursor()
 
         # Insert data into database
-        cursor.execute('INSERT INTO products (userid, name, size, brand, price) VALUES (%s,%s, %s, %s, %s)', (userid,name, size, brand, price))
+        cursor.execute('INSERT INTO products (userid, name, size, brand, price) VALUES (%s,%s, %s, %s, %s, %s)', (userid,name, size, brand, price,quantity))
         self.db_connection.commit()
 
         # Close the connection
@@ -61,9 +66,7 @@ class Add:
 if __name__ == "__main__":
     db_connection = mysql.connector.connect(user='root', password='26072003', host='localhost', database='sneakershop')
 
-    def update_treeview():
-        # Update the treeview with new data from the database
-        pass  # Your code to update the treeview goes here
-
-    add_window = Add(db_connection, update_treeview)
+    
+    main_window = Main()
+    add_window = Add(db_connection, main_window.show_data)
     add_window.root.mainloop()
