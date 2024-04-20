@@ -1,61 +1,32 @@
-from tkinter import *
-from tkinter import messagebox
+import tkinter as tk
+from tkinter import ttk
 import mysql.connector
 
 class Delete:
-    def __init__(self, db_connection, update_callback):
+    def __init__(self, db_connection, show_data):
         self.db_connection = db_connection
-        self.cursor = db_connection.cursor()
-        self.update_callback = update_callback
+        self.update_callback = show_data
 
-        # Tạo cửa sổ
-        self.root = Tk()
+        self.root = tk.Tk()
         self.root.title('Xóa sản phẩm')
-        self.root.geometry('300x150')
+        self.root.geometry('200x100')
 
-        # Label và Entry cho mã sản phẩm
-        Label(self.root, text='Mã sản phẩm:').grid(row=0, column=0)
-        self.product_id_entry = Entry(self.root)
-        self.product_id_entry.grid(row=0, column=1)
+        tk.Label(self.root, text='Mã sản phẩm:').pack()
+        self.product_id_entry = tk.Entry(self.root)
+        self.product_id_entry.pack()
 
-        # Nút xóa
-        self.delete_button = Button(self.root, text='Xóa', command=self.delete_product)
-        self.delete_button.grid(row=1, column=0, columnspan=2)
+        tk.Button(self.root, text='Xóa', command=self.delete_product).pack()
 
     def delete_product(self):
         product_id = self.product_id_entry.get()
 
-        if not product_id:
-            messagebox.showerror('Lỗi', 'Vui lòng nhập mã sản phẩm.')
-            return
+        cursor = self.db_connection.cursor()
 
-        # Xác nhận việc xóa sản phẩm
-        confirmation = messagebox.askyesno('Xác nhận', 'Bạn có chắc chắn muốn xóa sản phẩm này?')
+        cursor.execute('DELETE FROM products WHERE id = %s', (product_id,))
+        self.db_connection.commit()
 
-        if confirmation:
-            try:
-                # Xóa sản phẩm từ cơ sở dữ liệu
-                self.cursor.execute('DELETE FROM products WHERE id = %s', (product_id,))
-                self.db_connection.commit()
+        cursor.close()
 
-                # Cập nhật treeview trong cửa sổ chính
-                self.update_callback()
+        self.update_callback()
 
-                messagebox.showinfo('Thông báo', 'Đã xóa sản phẩm thành công.')
-            except mysql.connector.Error as error:
-                messagebox.showerror('Lỗi', f'Lỗi khi xóa sản phẩm: {error}')
-
-        # Đóng cửa sổ
         self.root.destroy()
-
-if __name__ == "__main__":
-    # Kết nối đến cơ sở dữ liệu
-    db_connection = mysql.connector.connect(user='root', password='26072003', host='localhost', database='sneakershop')
-
-    # Hàm cập nhật treeview trong cửa sổ chính
-    def update_treeview():
-        pass  # Thay bằng mã để cập nhật treeview
-
-    # Mở cửa sổ xóa sản phẩm
-    delete_window = Delete(db_connection, update_treeview)
-    delete_window.root.mainloop()

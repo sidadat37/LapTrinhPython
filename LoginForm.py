@@ -1,9 +1,9 @@
 import tkinter as tk
 from tkinter import messagebox
 import mysql.connector
-import main
+from main import Main
 
-class LoginApp:
+class LoginForm:
     def __init__(self):
         self.root = tk.Tk()
         self.root.geometry('300x200')
@@ -32,7 +32,6 @@ class LoginApp:
 
     def check_credentials(self):
         try:
-            # Establish a connection to the database
             mydb = mysql.connector.connect(
                 host="localhost",
                 user="root",
@@ -40,30 +39,25 @@ class LoginApp:
                 database="sneakershop"
             )
 
-            # Create a cursor object
             mycursor = mydb.cursor()
 
-            # SQL query to check the credentials
             sql = "SELECT * FROM users WHERE username = %s AND password = %s"
             val = (self.username_entry.get(), self.password_entry.get())
 
-            # Execute the query
             mycursor.execute(sql, val)
 
-            # Fetch the result
             result = mycursor.fetchone()
 
             if result:
                 messagebox.showinfo("Login info", "Welcome " + str(result[1]) + "!")
                 self.root.destroy()
-                main.Main()
+                Main(result[1])  # Truyền tên người dùng sang Main
             else:
                 messagebox.showinfo("Login info", "Incorrect credentials")
 
-            # Close the connection
             mydb.close()
         except mysql.connector.Error as err:
             messagebox.showerror("Database error", "Something went wrong: {}".format(err))
 
 if __name__ == "__main__":
-    app = LoginApp()
+    app = LoginForm()
